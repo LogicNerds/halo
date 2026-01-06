@@ -1010,6 +1010,34 @@
         </div>
     </div>
 
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('editUserModal')">&times;</span>
+                Edit User
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-input" id="editUserName">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Role</label>
+                <select class="form-select" id="editUserRole">
+                    <option value="rep">Sales Rep</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Daily Target (points)</label>
+                <input type="number" class="form-input" id="editUserTarget" min="1">
+            </div>
+            
+            <button class="btn btn-primary" onclick="saveUserEdit()">Save Changes</button>
+        </div>
+    </div>
+
     <!-- Pack Settings Modal -->
     <div id="packSettingsModal" class="modal">
         <div class="modal-content">
@@ -1055,8 +1083,8 @@
                 <div style="font-size: 14px; margin-bottom: 8px;"><strong>Expected CSV Format:</strong></div>
                 <div style="font-size: 12px; font-family: monospace; background: white; padding: 8px; border-radius: 4px;">
                     name,status,owner<br>
-                    Green Valley Dispensary,Active,Sarah Johnson<br>
-                    Mountain High Cannabis,Prospect,Mike Chen
+                    Green Valley Dispensary,Active,Dean Martin<br>
+                    Mountain High Cannabis,Prospect,Pablo Picasso
                 </div>
                 <div style="font-size: 12px; color: #666; margin-top: 8px;">
                     • Header row required<br>
@@ -1199,21 +1227,28 @@
                     users: [
                         {
                             id: 'admin_1',
-                            name: 'Admin User',
+                            name: 'Alex Thompson',
+                            role: 'admin',
+                            target: 50,
+                            createdAt: now
+                        },
+                        {
+                            id: 'admin_2',
+                            name: 'Jordan Martinez',
                             role: 'admin',
                             target: 50,
                             createdAt: now
                         },
                         {
                             id: 'rep_1',
-                            name: 'Sarah Johnson',
+                            name: 'Dean Martin',
                             role: 'rep',
                             target: 50,
                             createdAt: now
                         },
                         {
                             id: 'rep_2',
-                            name: 'Mike Chen',
+                            name: 'Pablo Picasso',
                             role: 'rep',
                             target: 50,
                             createdAt: now
@@ -2507,8 +2542,8 @@
                             <div style="font-size: 12px; color: #666;">${user.role === 'admin' ? 'Administrator' : 'Sales Rep'}</div>
                             <div style="font-size: 12px; color: #666;">Target: ${user.target || AppState.workspace.defaultTarget} pts/day</div>
                         </div>
-                        <div>
-                            ${user.role === 'rep' ? `<button class="btn-small btn-secondary" onclick="editUserTarget('${user.id}')">Edit Target</button>` : ''}
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-small btn-secondary" onclick="showEditUser('${user.id}')">Edit User</button>
                             ${user.id !== AppState.currentUser.id ? `<button class="btn-small btn-danger" onclick="removeUser('${user.id}')">Remove</button>` : ''}
                         </div>
                     </div>
@@ -2520,18 +2555,74 @@
             modal.classList.add('active');
         }
 
-        function editUserTarget(userId) {
+        let editingUserId = null;
+
+        function showEditUser(userId) {
+            editingUserId = userId;
             const user = AppState.getUser(userId);
-            const newTarget = prompt(`Enter new daily target for ${user.name}:`, user.target || AppState.workspace.defaultTarget);
             
-            if (newTarget !== null) {
-                const target = parseInt(newTarget);
-                if (target > 0) {
-                    user.target = target;
-                    AppState.saveWorkspace();
-                    showUserManagement();
+            document.getElementById('editUserName').value = user.name;
+            document.getElementById('editUserRole').value = user.role;
+            document.getElementById('editUserTarget').value = user.target || AppState.workspace.defaultTarget;
+            
+            closeModal('userManagementModal');
+            document.getElementById('editUserModal').classList.add('active');
+        }
+
+        function saveUserEdit() {
+            if (!editingUserId) return;
+            
+            const user = AppState.getUser(editingUserId);
+            const newName = document.getElementById('editUserName').value.trim();
+            const newRole = document.getElementById('editUserRole').value;
+            const newTarget = parseInt(document.getElementById('editUserTarget').value);
+            
+            if (!newName) {
+                alert('Please enter a name');
+                return;
+            }
+            
+            if (!newTarget || newTarget < 1) {
+                alert('Please enter a valid target (minimum 1)');
+                return;
+            }
+            
+            // Check if changing to admin and limit is reached
+            if (newRole === 'admin' && user.role !== 'admin') {
+                const adminCount = AppState.workspace.users.filter(u => u.role === 'admin' && u.id !== user.id).length;
+                if (adminCount >= 2) {
+                    alert('Maximum 2 admins allowed per workspace');
+                    return;
                 }
             }
+            
+            // Update user
+            user.name = newName;
+            user.role = newRole;
+            user.target = newTarget;
+            
+            AppState.saveWorkspace();
+            
+            closeModal('editUserModal');
+            showUserManagement();
+            
+            // Update header if editing current user
+            if (editingUserId === AppState.currentUser.id) {
+                updateHeader();
+                
+                // Update admin nav visibility if role changed
+                if (newRole === 'admin') {
+                    document.getElementById('adminNavBtn').style.display = 'block';
+                } else {
+                    document.getElementById('adminNavBtn').style.display = 'none';
+                    // If currently on admin screen, navigate to home
+                    if (AppState.currentScreen === 'admin') {
+                        navigate('home');
+                    }
+                }
+            }
+            
+            editingUserId = null;
         }
 
         function removeUser(userId) {
@@ -2591,8 +2682,8 @@
             // Check admin limit
             if (role === 'admin') {
                 const adminCount = AppState.workspace.users.filter(u => u.role === 'admin').length;
-                if (adminCount >= 1) {
-                    alert('Only one admin allowed per workspace');
+                if (adminCount >= 2) {
+                    alert('Maximum 2 admins allowed per workspace');
                     return;
                 }
             }
