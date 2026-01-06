@@ -1,0 +1,2725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halo - Micro CRM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            padding-bottom: 70px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .halo-icon {
+            width: 28px;
+            height: 28px;
+            border: 3px solid white;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+
+        /* Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #666;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* Content */
+        .content {
+            padding: 20px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-danger {
+            background: #ff4444;
+            color: white;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+            width: auto;
+            display: inline-block;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .streak-badge {
+            display: inline-block;
+            background: #ffd700;
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        /* Account List */
+        .account-list {
+            list-style: none;
+        }
+
+        .account-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .account-item:active {
+            transform: scale(0.98);
+            background: #f5f5f5;
+        }
+
+        .account-halo {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #4CAF50;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .account-halo.faded {
+            border-color: #FFA726;
+        }
+
+        .account-halo.critical {
+            border-color: #EF5350;
+        }
+
+        .account-info {
+            flex: 1;
+        }
+
+        .account-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .account-meta {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .account-status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .account-status.prospect {
+            background: #E3F2FD;
+            color: #1976D2;
+        }
+
+        .account-status.active {
+            background: #E8F5E9;
+            color: #388E3C;
+        }
+
+        .account-status.dormant {
+            background: #FBE9E7;
+            color: #D84315;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        /* Activity Type Grid */
+        .activity-type-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .activity-type-btn {
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .activity-type-btn:hover, .activity-type-btn.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .activity-type-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .activity-type-points {
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* Timeline */
+        .timeline {
+            list-style: none;
+        }
+
+        .timeline-item {
+            border-left: 3px solid #e0e0e0;
+            padding-left: 16px;
+            padding-bottom: 16px;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -7px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #667eea;
+        }
+
+        .timeline-date {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        .timeline-content {
+            font-size: 14px;
+        }
+
+        .timeline-type {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        /* Sign In */
+        .sign-in-screen {
+            padding: 40px 20px;
+        }
+
+        .user-select-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .user-select-btn {
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .user-select-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .user-role {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Team Summary */
+        .team-member-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .team-member-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .team-member-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .team-member-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+        }
+
+        .team-stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .team-stat-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .team-stat-value {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        /* History View */
+        .history-section {
+            margin-bottom: 24px;
+        }
+
+        .week-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .week-range {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .week-total {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .daily-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .day-box {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            background: #fff;
+        }
+
+        .day-box.hit {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .day-box.miss {
+            background: #EF5350;
+            color: white;
+        }
+
+        .day-label {
+            font-weight: 600;
+        }
+
+        .day-points {
+            font-size: 9px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        /* Utility */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-16 {
+            margin-top: 16px;
+        }
+
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+
+        .flex {
+            display: flex;
+            gap: 8px;
+        }
+
+        .flex-1 {
+            flex: 1;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span class="halo-icon"></span> Halo</h1>
+            <div class="header-subtitle" id="headerSubtitle">Micro CRM</div>
+        </div>
+
+        <!-- Sign In Screen -->
+        <div id="signInScreen" class="screen active">
+            <div class="sign-in-screen">
+                <div class="card">
+                    <div class="card-title">Welcome to Halo</div>
+                    <p style="margin-bottom: 20px; color: #666;">Select your profile to continue</p>
+                    
+                    <div class="user-select-grid" id="userSelectGrid"></div>
+                    
+                    <button class="btn btn-secondary mt-16" onclick="showCreateUser()">+ Create New User</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App Content -->
+        <div id="mainApp" class="screen">
+            <!-- Rep Home Screen -->
+            <div id="homeScreen" class="screen">
+                <div class="content">
+                    <!-- Stats Card -->
+                    <div class="card">
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-value" id="pointsToday">0</div>
+                                <div class="stat-label">Today</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value" id="pointsWeek">0</div>
+                                <div class="stat-label">This Week</div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div style="font-size: 14px; color: #666; margin-bottom: 4px;">Daily Target: <span id="dailyTarget">50</span></div>
+                            <div id="streakBadge"></div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <button class="btn btn-primary" onclick="showLogActivity()">📝 Log Activity</button>
+                    <button class="btn btn-primary" onclick="showCreatePO()">🛒 Create Purchase Order</button>
+
+                    <!-- Recent Accounts -->
+                    <div class="card">
+                        <div class="card-title">Recent Accounts</div>
+                        <ul class="account-list" id="recentAccountsList"></ul>
+                    </div>
+
+                    <!-- At Risk Accounts -->
+                    <div class="card" id="atRiskCard">
+                        <div class="card-title">⚠️ At Risk Accounts</div>
+                        <ul class="account-list" id="atRiskAccountsList"></ul>
+                    </div>
+
+                    <!-- History Link -->
+                    <button class="btn btn-secondary" onclick="showHistory()">📊 View Performance History</button>
+                </div>
+            </div>
+
+            <!-- Accounts Screen -->
+            <div id="accountsScreen" class="screen">
+                <div class="content">
+                    <div class="card">
+                        <div class="card-title">My Accounts</div>
+                        <input type="text" class="form-input mb-8" placeholder="Search accounts..." id="accountSearch" oninput="filterAccounts()">
+                        <ul class="account-list" id="allAccountsList"></ul>
+                    </div>
+                    <button class="btn btn-secondary" onclick="showCreateAccount()">+ Add Account</button>
+                </div>
+            </div>
+
+            <!-- Purchase Orders Screen -->
+            <div id="posScreen" class="screen">
+                <div class="content">
+                    <div class="card">
+                        <div class="card-title">Purchase Orders</div>
+                        <div class="flex mb-8" style="overflow-x: auto;">
+                            <button class="btn-small btn-secondary" onclick="filterPOs('all')">All</button>
+                            <button class="btn-small btn-secondary" onclick="filterPOs('Draft')">Draft</button>
+                            <button class="btn-small btn-secondary" onclick="filterPOs('Submitted')">Submitted</button>
+                            <button class="btn-small btn-secondary" onclick="filterPOs('Verified')">Verified</button>
+                            <button class="btn-small btn-secondary" onclick="filterPOs('Scheduled')">Scheduled</button>
+                            <button class="btn-small btn-secondary" onclick="filterPOs('Fulfilled')">Fulfilled</button>
+                        </div>
+                        <div id="posList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Screen -->
+            <div id="adminScreen" class="screen">
+                <div class="content">
+                    <!-- Team Summary -->
+                    <div class="card">
+                        <div class="card-title">Team Summary</div>
+                        <div id="teamSummary"></div>
+                    </div>
+
+                    <!-- Account Health -->
+                    <div class="card">
+                        <div class="card-title">Account Health</div>
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-value" id="activeAccountsCount">0</div>
+                                <div class="stat-label">Active</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value" id="atRiskCount">0</div>
+                                <div class="stat-label">At Risk (7d)</div>
+                            </div>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-value" id="criticalCount">0</div>
+                                <div class="stat-label">Critical (14d)</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value" id="teamVelocity">0%</div>
+                                <div class="stat-label">Team Velocity</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings -->
+                    <div class="card">
+                        <div class="card-title">Settings</div>
+                        <button class="btn btn-secondary" onclick="showActivitySettings()">⚙️ Activity Point Values</button>
+                        <button class="btn btn-secondary" onclick="showUserManagement()">👥 Manage Users</button>
+                        <button class="btn btn-secondary" onclick="showPackSettings()">📦 Workspace Settings</button>
+                        <button class="btn btn-secondary" onclick="exportData()">💾 Export Data (JSON)</button>
+                    </div>
+
+                    <!-- All Accounts (Admin View) -->
+                    <div class="card">
+                        <div class="card-title">All Accounts</div>
+                        <div id="adminAccountsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav" id="bottomNav" style="display: none;">
+            <button class="nav-item active" onclick="navigate('home')">
+                <span class="nav-icon">🏠</span>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" onclick="navigate('accounts')">
+                <span class="nav-icon">👥</span>
+                <span>Accounts</span>
+            </button>
+            <button class="nav-item" onclick="navigate('pos')">
+                <span class="nav-icon">🛒</span>
+                <span>Orders</span>
+            </button>
+            <button class="nav-item" id="adminNavBtn" onclick="navigate('admin')" style="display: none;">
+                <span class="nav-icon">⚙️</span>
+                <span>Admin</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    
+    <!-- Log Activity Modal -->
+    <div id="logActivityModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('logActivityModal')">&times;</span>
+                Log Activity
+            </div>
+            
+            <div id="activityStep1">
+                <div class="form-group">
+                    <label class="form-label">Select Account</label>
+                    <input type="text" class="form-input" placeholder="Search..." id="activityAccountSearch" oninput="filterActivityAccounts()">
+                    <div id="activityAccountList" style="max-height: 300px; overflow-y: auto; margin-top: 8px;"></div>
+                </div>
+            </div>
+
+            <div id="activityStep2" class="hidden">
+                <div class="form-group">
+                    <label class="form-label">Activity Type</label>
+                    <div class="activity-type-grid" id="activityTypeGrid"></div>
+                </div>
+                <button class="btn btn-secondary" onclick="activityBackToStep1()">← Back</button>
+            </div>
+
+            <div id="activityStep3" class="hidden">
+                <div class="form-group">
+                    <label class="form-label">Notes (Required)</label>
+                    <textarea class="form-textarea" id="activityNotes" placeholder="What happened?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Outcome (Optional)</label>
+                    <input type="text" class="form-input" id="activityOutcome" placeholder="e.g., Follow up next week">
+                </div>
+                <div class="flex">
+                    <button class="btn btn-secondary flex-1" onclick="activityBackToStep2()">← Back</button>
+                    <button class="btn btn-primary flex-1" onclick="saveActivity()">Save Activity</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Detail Modal -->
+    <div id="accountDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('accountDetailModal')">&times;</span>
+                <div id="accountDetailName"></div>
+            </div>
+            
+            <div id="accountDetailContent"></div>
+        </div>
+    </div>
+
+    <!-- Create/Edit Account Modal -->
+    <div id="accountFormModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('accountFormModal')">&times;</span>
+                <span id="accountFormTitle">Create Account</span>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Account Name</label>
+                <input type="text" class="form-input" id="accountFormName">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select class="form-select" id="accountFormStatus">
+                    <option value="Prospect">Prospect</option>
+                    <option value="Active">Active</option>
+                    <option value="Dormant">Dormant</option>
+                </select>
+            </div>
+            <div class="form-group" id="accountFormOwnerGroup">
+                <label class="form-label">Owner</label>
+                <select class="form-select" id="accountFormOwner"></select>
+            </div>
+            
+            <button class="btn btn-primary" onclick="saveAccount()">Save Account</button>
+        </div>
+    </div>
+
+    <!-- Create/Edit PO Modal -->
+    <div id="poFormModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('poFormModal')">&times;</span>
+                <span id="poFormTitle">Create Purchase Order</span>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Account</label>
+                <select class="form-select" id="poFormAccount"></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Requested Date</label>
+                <input type="date" class="form-input" id="poFormDate">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Line Summary</label>
+                <textarea class="form-textarea" id="poFormLines" placeholder="e.g., 10x Gummies 100mg, 5x Vape carts"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Total Amount (Optional)</label>
+                <input type="number" class="form-input" id="poFormAmount" placeholder="0.00" step="0.01">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea class="form-textarea" id="poFormNotes"></textarea>
+            </div>
+            <div class="form-group" id="poFormStatusGroup" style="display: none;">
+                <label class="form-label">Status</label>
+                <select class="form-select" id="poFormStatus">
+                    <option value="Draft">Draft</option>
+                    <option value="Submitted">Submitted</option>
+                    <option value="Verified">Verified</option>
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="Fulfilled">Fulfilled</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+            
+            <div class="flex">
+                <button class="btn btn-secondary flex-1" onclick="savePO('Draft')">Save Draft</button>
+                <button class="btn btn-primary flex-1" onclick="savePO('Submitted')">Submit Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create User Modal -->
+    <div id="createUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('createUserModal')">&times;</span>
+                Create New User
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-input" id="newUserName">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Role</label>
+                <select class="form-select" id="newUserRole">
+                    <option value="rep">Sales Rep</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            
+            <button class="btn btn-primary" onclick="createUser()">Create User</button>
+        </div>
+    </div>
+
+    <!-- Activity Settings Modal -->
+    <div id="activitySettingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('activitySettingsModal')">&times;</span>
+                Activity Point Values
+            </div>
+            
+            <div id="activitySettingsList"></div>
+            
+            <button class="btn btn-primary" onclick="saveActivitySettings()">Save Settings</button>
+        </div>
+    </div>
+
+    <!-- User Management Modal -->
+    <div id="userManagementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('userManagementModal')">&times;</span>
+                Manage Users
+            </div>
+            
+            <div id="userManagementList"></div>
+            
+            <button class="btn btn-secondary mt-16" onclick="showCreateUser()">+ Add User</button>
+        </div>
+    </div>
+
+    <!-- Pack Settings Modal -->
+    <div id="packSettingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('packSettingsModal')">&times;</span>
+                Workspace Settings
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Purchased Packs (1 pack = 10 reps + 1 admin)</label>
+                <input type="number" class="form-input" id="purchasedPacks" min="1" value="1">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Default Daily Target (points)</label>
+                <input type="number" class="form-input" id="defaultTarget" min="1" value="50">
+            </div>
+            
+            <button class="btn btn-primary" onclick="savePackSettings()">Save Settings</button>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('historyModal')">&times;</span>
+                Performance History
+            </div>
+            
+            <div id="historyContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // DATA LAYER - Interface for storage (can swap LocalStore for FirebaseStore)
+        // ============================================================================
+
+        /**
+         * DataStore Interface
+         * TODO: Firebase implementation would use:
+         * - Collection: workspaces/{workspaceId}
+         * - Subcollections: accounts, contacts, activities, purchaseOrders, users, userHistory
+         * - Security: All queries scoped by workspaceId
+         */
+        class DataStore {
+            async getWorkspace() { throw new Error('Not implemented'); }
+            async saveWorkspace(data) { throw new Error('Not implemented'); }
+        }
+
+        /**
+         * LocalStore - localStorage implementation (working)
+         */
+        class LocalStore extends DataStore {
+            constructor() {
+                super();
+                this.STORAGE_KEY = 'halo_workspace';
+                this.saveDebounceTimer = null;
+            }
+
+            async getWorkspace() {
+                const data = localStorage.getItem(this.STORAGE_KEY);
+                return data ? JSON.parse(data) : null;
+            }
+
+            async saveWorkspace(data) {
+                // Debounce writes to prevent performance issues
+                clearTimeout(this.saveDebounceTimer);
+                this.saveDebounceTimer = setTimeout(() => {
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+                }, 300);
+            }
+        }
+
+        /**
+         * FirebaseStore - Stub for future Firebase implementation
+         * TODO: Implement using Firebase SDK
+         */
+        class FirebaseStore extends DataStore {
+            constructor(workspaceId) {
+                super();
+                this.workspaceId = workspaceId;
+                // TODO: Initialize Firebase
+                // this.db = firebase.firestore();
+            }
+
+            async getWorkspace() {
+                // TODO: Implement Firebase read
+                // const doc = await this.db.collection('workspaces').doc(this.workspaceId).get();
+                // return doc.data();
+                throw new Error('Firebase not implemented yet');
+            }
+
+            async saveWorkspace(data) {
+                // TODO: Implement Firebase write
+                // await this.db.collection('workspaces').doc(this.workspaceId).set(data);
+                throw new Error('Firebase not implemented yet');
+            }
+        }
+
+        // ============================================================================
+        // APP STATE
+        // ============================================================================
+
+        const AppState = {
+            currentUser: null,
+            workspace: null,
+            store: new LocalStore(), // Swap to FirebaseStore when ready
+            currentScreen: 'home',
+            currentPOFilter: 'all',
+            
+            // Activity type configuration
+            activityStep: 1,
+            selectedAccount: null,
+            selectedActivityType: null,
+            
+            // Edit states
+            editingAccountId: null,
+            editingPOId: null,
+
+            async init() {
+                await this.loadWorkspace();
+                if (!this.workspace) {
+                    this.workspace = this.createDefaultWorkspace();
+                    await this.saveWorkspace();
+                }
+                renderSignIn();
+            },
+
+            createDefaultWorkspace() {
+                const now = new Date().toISOString();
+                
+                return {
+                    id: 'workspace_1',
+                    name: 'My Workspace',
+                    purchasedPacks: 1,
+                    defaultTarget: 50,
+                    
+                    activityTypes: [
+                        { id: 'note', name: 'Quick Note / Update', points: 1 },
+                        { id: 'call', name: 'Outgoing Call', points: 3 },
+                        { id: 'conversation', name: 'Meaningful Conversation', points: 10 },
+                        { id: 'referral', name: 'Referral Requested', points: 15 },
+                        { id: 'meeting', name: 'Meeting Scheduled', points: 20 }
+                    ],
+                    
+                    users: [
+                        {
+                            id: 'admin_1',
+                            name: 'Admin User',
+                            role: 'admin',
+                            target: 50,
+                            createdAt: now
+                        },
+                        {
+                            id: 'rep_1',
+                            name: 'Sarah Johnson',
+                            role: 'rep',
+                            target: 50,
+                            createdAt: now
+                        },
+                        {
+                            id: 'rep_2',
+                            name: 'Mike Chen',
+                            role: 'rep',
+                            target: 50,
+                            createdAt: now
+                        }
+                    ],
+                    
+                    accounts: [
+                        {
+                            id: 'acc_1',
+                            name: 'Green Valley Dispensary',
+                            status: 'Active',
+                            ownerUserId: 'rep_1',
+                            createdAt: now,
+                            lastActivityAt: now,
+                            lastPointsAt: now
+                        },
+                        {
+                            id: 'acc_2',
+                            name: 'Mountain High Cannabis',
+                            status: 'Active',
+                            ownerUserId: 'rep_1',
+                            createdAt: now,
+                            lastActivityAt: this.daysAgo(5),
+                            lastPointsAt: this.daysAgo(5)
+                        },
+                        {
+                            id: 'acc_3',
+                            name: 'City Buds Co',
+                            status: 'Prospect',
+                            ownerUserId: 'rep_1',
+                            createdAt: now,
+                            lastActivityAt: this.daysAgo(10),
+                            lastPointsAt: this.daysAgo(10)
+                        },
+                        {
+                            id: 'acc_4',
+                            name: 'Coastal Cannabis',
+                            status: 'Active',
+                            ownerUserId: 'rep_2',
+                            createdAt: now,
+                            lastActivityAt: now,
+                            lastPointsAt: now
+                        },
+                        {
+                            id: 'acc_5',
+                            name: 'Desert Bloom Dispensary',
+                            status: 'Prospect',
+                            ownerUserId: 'rep_2',
+                            createdAt: now,
+                            lastActivityAt: this.daysAgo(8),
+                            lastPointsAt: this.daysAgo(8)
+                        },
+                        {
+                            id: 'acc_6',
+                            name: 'Urban Herbals',
+                            status: 'Active',
+                            ownerUserId: 'rep_2',
+                            createdAt: now,
+                            lastActivityAt: this.daysAgo(15),
+                            lastPointsAt: this.daysAgo(15)
+                        },
+                        // Test accounts
+                        {
+                            id: 'acc_7',
+                            name: 'Test Account Alpha',
+                            status: 'Prospect',
+                            ownerUserId: 'rep_1',
+                            createdAt: now,
+                            lastActivityAt: this.daysAgo(3),
+                            lastPointsAt: this.daysAgo(3)
+                        },
+                        {
+                            id: 'acc_8',
+                            name: 'Test Account Beta',
+                            status: 'Active',
+                            ownerUserId: 'rep_2',
+                            createdAt: now,
+                            lastActivityAt: this.daysAgo(1),
+                            lastPointsAt: this.daysAgo(1)
+                        }
+                    ],
+                    
+                    activities: [
+                        {
+                            id: 'act_1',
+                            accountId: 'acc_1',
+                            userId: 'rep_1',
+                            type: 'conversation',
+                            points: 10,
+                            notes: 'Discussed new product line expansion',
+                            outcome: 'Follow up next week',
+                            createdAt: now
+                        },
+                        {
+                            id: 'act_2',
+                            accountId: 'acc_4',
+                            userId: 'rep_2',
+                            type: 'meeting',
+                            points: 20,
+                            notes: 'Scheduled quarterly review meeting',
+                            outcome: 'Meeting set for next Thursday',
+                            createdAt: now
+                        }
+                    ],
+                    
+                    purchaseOrders: [
+                        {
+                            id: 'po_1',
+                            accountId: 'acc_1',
+                            userId: 'rep_1',
+                            status: 'Submitted',
+                            requestedDate: this.formatDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)),
+                            totalAmount: 2500,
+                            lineSummary: '10x Gummies 100mg, 5x Vape carts',
+                            notes: 'Rush order for weekend',
+                            createdAt: now,
+                            updatedAt: now
+                        }
+                    ],
+                    
+                    userHistory: []
+                };
+            },
+
+            daysAgo(days) {
+                const date = new Date();
+                date.setDate(date.getDate() - days);
+                return date.toISOString();
+            },
+
+            formatDate(date) {
+                return date.toISOString().split('T')[0];
+            },
+
+            async loadWorkspace() {
+                this.workspace = await this.store.getWorkspace();
+            },
+
+            async saveWorkspace() {
+                await this.store.saveWorkspace(this.workspace);
+            },
+
+            // ============================================================================
+            // SELECTORS / HELPERS
+            // ============================================================================
+
+            getUser(userId) {
+                return this.workspace.users.find(u => u.id === userId);
+            },
+
+            getAccount(accountId) {
+                return this.workspace.accounts.find(a => a.id === accountId);
+            },
+
+            getUserAccounts(userId) {
+                return this.workspace.accounts.filter(a => a.ownerUserId === userId);
+            },
+
+            getActivityType(typeId) {
+                return this.workspace.activityTypes.find(t => t.id === typeId);
+            },
+
+            // Get activities for a specific date
+            getActivitiesForDate(userId, date) {
+                const dateStr = date.toISOString().split('T')[0];
+                return this.workspace.activities.filter(a => 
+                    a.userId === userId && 
+                    a.createdAt.startsWith(dateStr)
+                );
+            },
+
+            // Points for today
+            pointsToday(userId) {
+                const today = new Date();
+                const activities = this.getActivitiesForDate(userId, today);
+                return activities.reduce((sum, a) => sum + a.points, 0);
+            },
+
+            // Points for current week (Sunday - Saturday)
+            pointsThisWeek(userId) {
+                const { start, end } = this.getCurrentWeek();
+                return this.workspace.activities
+                    .filter(a => {
+                        if (a.userId !== userId) return false;
+                        const actDate = new Date(a.createdAt);
+                        return actDate >= start && actDate <= end;
+                    })
+                    .reduce((sum, a) => sum + a.points, 0);
+            },
+
+            // Get current week boundaries (Sunday - Saturday)
+            getCurrentWeek() {
+                const now = new Date();
+                const dayOfWeek = now.getDay(); // 0 = Sunday
+                
+                const start = new Date(now);
+                start.setDate(now.getDate() - dayOfWeek);
+                start.setHours(0, 0, 0, 0);
+                
+                const end = new Date(start);
+                end.setDate(start.getDate() + 6);
+                end.setHours(23, 59, 59, 999);
+                
+                return { start, end };
+            },
+
+            // Get week boundaries for any date
+            getWeekBoundaries(date) {
+                const dayOfWeek = date.getDay();
+                
+                const start = new Date(date);
+                start.setDate(date.getDate() - dayOfWeek);
+                start.setHours(0, 0, 0, 0);
+                
+                const end = new Date(start);
+                end.setDate(start.getDate() + 6);
+                end.setHours(23, 59, 59, 999);
+                
+                return { start, end };
+            },
+
+            // Count business days elapsed in current week (Mon-Fri)
+            businessDaysElapsedThisWeek() {
+                const { start } = this.getCurrentWeek();
+                const now = new Date();
+                let count = 0;
+                
+                for (let d = new Date(start); d <= now; d.setDate(d.getDate() + 1)) {
+                    const day = d.getDay();
+                    if (day !== 0 && day !== 6) { // Not Sunday or Saturday
+                        count++;
+                    }
+                }
+                
+                return count;
+            },
+
+            // Calculate current week streak (consecutive days hit target THIS week)
+            streakDays(userId) {
+                const user = this.getUser(userId);
+                const target = user.target || this.workspace.defaultTarget;
+                const { start } = this.getCurrentWeek();
+                const now = new Date();
+                
+                let streak = 0;
+                let checkDate = new Date(now);
+                checkDate.setHours(0, 0, 0, 0);
+                
+                // Check backwards from today until start of week
+                while (checkDate >= start) {
+                    const activities = this.getActivitiesForDate(userId, checkDate);
+                    const points = activities.reduce((sum, a) => sum + a.points, 0);
+                    
+                    if (points >= target) {
+                        streak++;
+                        checkDate.setDate(checkDate.getDate() - 1);
+                    } else {
+                        break;
+                    }
+                }
+                
+                return streak;
+            },
+
+            // Account halo state based on lastPointsAt
+            accountHaloState(accountId) {
+                const account = this.getAccount(accountId);
+                if (!account || !account.lastPointsAt) return 'CRITICAL';
+                
+                const lastPoints = new Date(account.lastPointsAt);
+                const now = new Date();
+                const daysSince = Math.floor((now - lastPoints) / (1000 * 60 * 60 * 24));
+                
+                if (daysSince >= 14) return 'CRITICAL';
+                if (daysSince >= 7) return 'FADED';
+                return 'OK';
+            },
+
+            // Recent accounts for user (by lastActivityAt)
+            recentAccountsForUser(userId, limit = 5) {
+                return this.getUserAccounts(userId)
+                    .sort((a, b) => new Date(b.lastActivityAt) - new Date(a.lastActivityAt))
+                    .slice(0, limit);
+            },
+
+            // At-risk accounts for user
+            atRiskAccountsForUser(userId) {
+                return this.getUserAccounts(userId)
+                    .filter(a => {
+                        const state = this.accountHaloState(a.id);
+                        return state === 'FADED' || state === 'CRITICAL';
+                    })
+                    .sort((a, b) => new Date(a.lastPointsAt) - new Date(b.lastPointsAt));
+            },
+
+            // Team velocity calculation
+            teamVelocity() {
+                const reps = this.workspace.users.filter(u => u.role === 'rep');
+                const businessDays = this.businessDaysElapsedThisWeek();
+                
+                if (businessDays === 0) return 0;
+                
+                const totalPoints = reps.reduce((sum, rep) => sum + this.pointsThisWeek(rep.id), 0);
+                const totalTarget = reps.reduce((sum, rep) => sum + (rep.target || this.workspace.defaultTarget), 0);
+                const expectedPoints = totalTarget * businessDays;
+                
+                if (expectedPoints === 0) return 0;
+                
+                return Math.round((totalPoints / expectedPoints) * 100);
+            },
+
+            // Account health metrics
+            accountHealthMetrics() {
+                const accounts = this.workspace.accounts;
+                return {
+                    active: accounts.filter(a => a.status === 'Active').length,
+                    atRisk: accounts.filter(a => this.accountHaloState(a.id) === 'FADED').length,
+                    critical: accounts.filter(a => this.accountHaloState(a.id) === 'CRITICAL').length
+                };
+            },
+
+            // Get user history for current week
+            getCurrentWeekHistory(userId) {
+                const { start } = this.getCurrentWeek();
+                const weekStart = start.toISOString().split('T')[0];
+                
+                const history = this.workspace.userHistory.find(h => 
+                    h.userId === userId && h.weekStart === weekStart
+                );
+                
+                return history;
+            },
+
+            // Archive current week (called at end of week)
+            archiveCurrentWeek(userId) {
+                const user = this.getUser(userId);
+                const target = user.target || this.workspace.defaultTarget;
+                const { start, end } = this.getCurrentWeek();
+                const weekStart = start.toISOString().split('T')[0];
+                
+                // Check if already archived
+                const existing = this.workspace.userHistory.findIndex(h => 
+                    h.userId === userId && h.weekStart === weekStart
+                );
+                
+                if (existing !== -1) {
+                    // Already archived, skip
+                    return;
+                }
+                
+                // Build daily breakdown
+                const dailyBreakdown = [];
+                let currentDate = new Date(start);
+                
+                while (currentDate <= end) {
+                    const activities = this.getActivitiesForDate(userId, currentDate);
+                    const points = activities.reduce((sum, a) => sum + a.points, 0);
+                    
+                    dailyBreakdown.push({
+                        date: currentDate.toISOString().split('T')[0],
+                        points: points,
+                        hitTarget: points >= target
+                    });
+                    
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+                
+                const totalPoints = dailyBreakdown.reduce((sum, d) => sum + d.points, 0);
+                const daysHitTarget = dailyBreakdown.filter(d => d.hitTarget).length;
+                const streakAchieved = this.streakDays(userId);
+                
+                this.workspace.userHistory.push({
+                    userId: userId,
+                    weekStart: weekStart,
+                    totalPoints: totalPoints,
+                    daysHitTarget: daysHitTarget,
+                    streakAchieved: streakAchieved,
+                    dailyBreakdown: dailyBreakdown
+                });
+                
+                this.saveWorkspace();
+            },
+
+            // Get historical weeks for user
+            getUserWeekHistory(userId, limit = 8) {
+                return this.workspace.userHistory
+                    .filter(h => h.userId === userId)
+                    .sort((a, b) => new Date(b.weekStart) - new Date(a.weekStart))
+                    .slice(0, limit);
+            },
+
+            // Get monthly aggregation
+            getMonthlyStats(userId, year, month) {
+                const weeks = this.workspace.userHistory.filter(h => {
+                    if (h.userId !== userId) return false;
+                    const weekDate = new Date(h.weekStart);
+                    return weekDate.getFullYear() === year && weekDate.getMonth() === month;
+                });
+                
+                return {
+                    totalPoints: weeks.reduce((sum, w) => sum + w.totalPoints, 0),
+                    weeksCount: weeks.length,
+                    totalDaysHitTarget: weeks.reduce((sum, w) => sum + w.daysHitTarget, 0),
+                    bestStreak: Math.max(...weeks.map(w => w.streakAchieved), 0)
+                };
+            }
+        };
+
+        // ============================================================================
+        // UI RENDERING
+        // ============================================================================
+
+        function renderSignIn() {
+            const grid = document.getElementById('userSelectGrid');
+            grid.innerHTML = '';
+            
+            AppState.workspace.users.forEach(user => {
+                const btn = document.createElement('button');
+                btn.className = 'user-select-btn';
+                btn.onclick = () => signIn(user.id);
+                btn.innerHTML = `
+                    <div class="user-name">${user.name}</div>
+                    <div class="user-role">${user.role === 'admin' ? 'Administrator' : 'Sales Rep'}</div>
+                `;
+                grid.appendChild(btn);
+            });
+        }
+
+        function signIn(userId) {
+            AppState.currentUser = AppState.getUser(userId);
+            document.getElementById('signInScreen').classList.remove('active');
+            document.getElementById('mainApp').classList.add('active');
+            document.getElementById('bottomNav').style.display = 'flex';
+            
+            if (AppState.currentUser.role === 'admin') {
+                document.getElementById('adminNavBtn').style.display = 'block';
+            }
+            
+            updateHeader();
+            navigate('home');
+        }
+
+        function signOut() {
+            AppState.currentUser = null;
+            document.getElementById('signInScreen').classList.add('active');
+            document.getElementById('mainApp').classList.remove('active');
+            document.getElementById('bottomNav').style.display = 'none';
+        }
+
+        function updateHeader() {
+            if (AppState.currentUser) {
+                document.getElementById('headerSubtitle').textContent = AppState.currentUser.name;
+            }
+        }
+
+        function navigate(screen) {
+            // Update nav buttons
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+            
+            // Update screens
+            document.querySelectorAll('#mainApp > .screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screen + 'Screen').classList.add('active');
+            
+            AppState.currentScreen = screen;
+            
+            // Render screen content
+            if (screen === 'home') renderHome();
+            if (screen === 'accounts') renderAccounts();
+            if (screen === 'pos') renderPOs();
+            if (screen === 'admin') renderAdmin();
+        }
+
+        // ============================================================================
+        // HOME SCREEN
+        // ============================================================================
+
+        function renderHome() {
+            const userId = AppState.currentUser.id;
+            const target = AppState.currentUser.target || AppState.workspace.defaultTarget;
+            
+            // Stats
+            document.getElementById('pointsToday').textContent = AppState.pointsToday(userId);
+            document.getElementById('pointsWeek').textContent = AppState.pointsThisWeek(userId);
+            document.getElementById('dailyTarget').textContent = target;
+            
+            // Streak
+            const streak = AppState.streakDays(userId);
+            const streakBadge = document.getElementById('streakBadge');
+            if (streak >= 3) {
+                streakBadge.innerHTML = `<div class="streak-badge">🔥 ${streak} Day Streak!</div>`;
+            } else {
+                streakBadge.innerHTML = '';
+            }
+            
+            // Recent accounts
+            const recentAccounts = AppState.recentAccountsForUser(userId);
+            renderAccountList('recentAccountsList', recentAccounts);
+            
+            // At-risk accounts
+            const atRiskAccounts = AppState.atRiskAccountsForUser(userId);
+            if (atRiskAccounts.length > 0) {
+                document.getElementById('atRiskCard').style.display = 'block';
+                renderAccountList('atRiskAccountsList', atRiskAccounts);
+            } else {
+                document.getElementById('atRiskCard').style.display = 'none';
+            }
+        }
+
+        function renderAccountList(elementId, accounts) {
+            const list = document.getElementById(elementId);
+            list.innerHTML = '';
+            
+            if (accounts.length === 0) {
+                list.innerHTML = '<div class="empty-state">No accounts</div>';
+                return;
+            }
+            
+            accounts.forEach(account => {
+                const li = document.createElement('li');
+                li.className = 'account-item';
+                li.onclick = () => showAccountDetail(account.id);
+                
+                const state = AppState.accountHaloState(account.id);
+                const haloClass = state === 'OK' ? '' : state.toLowerCase();
+                
+                li.innerHTML = `
+                    <div class="account-halo ${haloClass}"></div>
+                    <div class="account-info">
+                        <div class="account-name">
+                            ${account.name}
+                            <span class="account-status ${account.status.toLowerCase()}">${account.status}</span>
+                        </div>
+                        <div class="account-meta">
+                            Last activity: ${formatTimeAgo(account.lastActivityAt)}
+                        </div>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        // ============================================================================
+        // ACCOUNTS SCREEN
+        // ============================================================================
+
+        function renderAccounts() {
+            const accounts = AppState.getUserAccounts(AppState.currentUser.id);
+            renderAccountList('allAccountsList', accounts);
+        }
+
+        function filterAccounts() {
+            const search = document.getElementById('accountSearch').value.toLowerCase();
+            const accounts = AppState.getUserAccounts(AppState.currentUser.id);
+            const filtered = accounts.filter(a => a.name.toLowerCase().includes(search));
+            renderAccountList('allAccountsList', filtered);
+        }
+
+        // ============================================================================
+        // ACCOUNT DETAIL
+        // ============================================================================
+
+        function showAccountDetail(accountId) {
+            const account = AppState.getAccount(accountId);
+            const modal = document.getElementById('accountDetailModal');
+            
+            document.getElementById('accountDetailName').textContent = account.name;
+            
+            const state = AppState.accountHaloState(accountId);
+            const stateLabel = state === 'OK' ? '✅ Active' : state === 'FADED' ? '⚠️ At Risk' : '🔴 Critical';
+            
+            // Get activities and POs for timeline
+            const activities = AppState.workspace.activities
+                .filter(a => a.accountId === accountId)
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            const pos = AppState.workspace.purchaseOrders
+                .filter(p => p.accountId === accountId)
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            const owner = AppState.getUser(account.ownerUserId);
+            const canEdit = AppState.currentUser.role === 'admin' || account.ownerUserId === AppState.currentUser.id;
+            
+            let content = `
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div>
+                            <span class="account-status ${account.status.toLowerCase()}">${account.status}</span>
+                            <span style="margin-left: 8px;">${stateLabel}</span>
+                        </div>
+                    </div>
+                    <div style="font-size: 14px; color: #666;">
+                        Owner: ${owner.name}<br>
+                        Last activity: ${formatTimeAgo(account.lastActivityAt)}
+                    </div>
+                </div>
+            `;
+            
+            if (canEdit) {
+                content += `
+                    <button class="btn btn-primary" onclick="showLogActivityForAccount('${accountId}')">📝 Log Activity</button>
+                    <button class="btn btn-primary" onclick="showCreatePOForAccount('${accountId}')">🛒 New Purchase Order</button>
+                    <button class="btn btn-secondary" onclick="editAccount('${accountId}')">✏️ Edit Account</button>
+                `;
+            }
+            
+            // Timeline
+            content += '<div class="card"><div class="card-title">Timeline</div><ul class="timeline">';
+            
+            // Merge activities and POs
+            const timeline = [
+                ...activities.map(a => ({ type: 'activity', data: a, date: a.createdAt })),
+                ...pos.map(p => ({ type: 'po', data: p, date: p.createdAt }))
+            ].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            if (timeline.length === 0) {
+                content += '<div class="empty-state">No activity yet</div>';
+            } else {
+                timeline.forEach(item => {
+                    if (item.type === 'activity') {
+                        const act = item.data;
+                        const actType = AppState.getActivityType(act.type);
+                        const user = AppState.getUser(act.userId);
+                        content += `
+                            <li class="timeline-item">
+                                <div class="timeline-date">${formatDateTime(act.createdAt)}</div>
+                                <div class="timeline-content">
+                                    <div class="timeline-type">${actType.name} (+${actType.points} pts)</div>
+                                    <div>${act.notes}</div>
+                                    ${act.outcome ? `<div style="font-size: 12px; color: #666; margin-top: 4px;">→ ${act.outcome}</div>` : ''}
+                                    <div style="font-size: 12px; color: #999; margin-top: 4px;">by ${user.name}</div>
+                                </div>
+                            </li>
+                        `;
+                    } else {
+                        const po = item.data;
+                        const user = AppState.getUser(po.userId);
+                        content += `
+                            <li class="timeline-item">
+                                <div class="timeline-date">${formatDateTime(po.createdAt)}</div>
+                                <div class="timeline-content">
+                                    <div class="timeline-type">🛒 Purchase Order - ${po.status}</div>
+                                    <div>${po.lineSummary}</div>
+                                    ${po.totalAmount ? `<div style="font-weight: 600; margin-top: 4px;">$${po.totalAmount.toFixed(2)}</div>` : ''}
+                                    <div style="font-size: 12px; color: #999; margin-top: 4px;">by ${user.name}</div>
+                                    ${canEdit ? `<button class="btn-small btn-secondary" style="margin-top: 8px;" onclick="editPO('${po.id}')">Edit Order</button>` : ''}
+                                </div>
+                            </li>
+                        `;
+                    }
+                });
+            }
+            
+            content += '</ul></div>';
+            
+            document.getElementById('accountDetailContent').innerHTML = content;
+            modal.classList.add('active');
+        }
+
+        // ============================================================================
+        // LOG ACTIVITY FLOW
+        // ============================================================================
+
+        function showLogActivity() {
+            AppState.activityStep = 1;
+            AppState.selectedAccount = null;
+            AppState.selectedActivityType = null;
+            
+            const modal = document.getElementById('logActivityModal');
+            
+            // Show step 1
+            document.getElementById('activityStep1').classList.remove('hidden');
+            document.getElementById('activityStep2').classList.add('hidden');
+            document.getElementById('activityStep3').classList.add('hidden');
+            
+            // Populate account list
+            const accounts = AppState.getUserAccounts(AppState.currentUser.id);
+            const listDiv = document.getElementById('activityAccountList');
+            listDiv.innerHTML = '';
+            
+            accounts.forEach(account => {
+                const btn = document.createElement('button');
+                btn.className = 'account-item';
+                btn.onclick = () => selectActivityAccount(account.id);
+                
+                const state = AppState.accountHaloState(account.id);
+                const haloClass = state === 'OK' ? '' : state.toLowerCase();
+                
+                btn.innerHTML = `
+                    <div class="account-halo ${haloClass}"></div>
+                    <div class="account-info">
+                        <div class="account-name">${account.name}</div>
+                        <div class="account-meta">${account.status}</div>
+                    </div>
+                `;
+                listDiv.appendChild(btn);
+            });
+            
+            modal.classList.add('active');
+        }
+
+        function showLogActivityForAccount(accountId) {
+            closeModal('accountDetailModal');
+            showLogActivity();
+            selectActivityAccount(accountId);
+        }
+
+        function filterActivityAccounts() {
+            const search = document.getElementById('activityAccountSearch').value.toLowerCase();
+            const accounts = AppState.getUserAccounts(AppState.currentUser.id);
+            const filtered = accounts.filter(a => a.name.toLowerCase().includes(search));
+            
+            const listDiv = document.getElementById('activityAccountList');
+            listDiv.innerHTML = '';
+            
+            filtered.forEach(account => {
+                const btn = document.createElement('button');
+                btn.className = 'account-item';
+                btn.onclick = () => selectActivityAccount(account.id);
+                
+                const state = AppState.accountHaloState(account.id);
+                const haloClass = state === 'OK' ? '' : state.toLowerCase();
+                
+                btn.innerHTML = `
+                    <div class="account-halo ${haloClass}"></div>
+                    <div class="account-info">
+                        <div class="account-name">${account.name}</div>
+                        <div class="account-meta">${account.status}</div>
+                    </div>
+                `;
+                listDiv.appendChild(btn);
+            });
+        }
+
+        function selectActivityAccount(accountId) {
+            AppState.selectedAccount = accountId;
+            AppState.activityStep = 2;
+            
+            document.getElementById('activityStep1').classList.add('hidden');
+            document.getElementById('activityStep2').classList.remove('hidden');
+            
+            // Populate activity types
+            const grid = document.getElementById('activityTypeGrid');
+            grid.innerHTML = '';
+            
+            AppState.workspace.activityTypes.forEach(type => {
+                const btn = document.createElement('button');
+                btn.className = 'activity-type-btn';
+                btn.onclick = () => selectActivityType(type.id);
+                btn.innerHTML = `
+                    <div class="activity-type-name">${type.name}</div>
+                    <div class="activity-type-points">+${type.points} points</div>
+                `;
+                grid.appendChild(btn);
+            });
+        }
+
+        function selectActivityType(typeId) {
+            AppState.selectedActivityType = typeId;
+            AppState.activityStep = 3;
+            
+            document.getElementById('activityStep2').classList.add('hidden');
+            document.getElementById('activityStep3').classList.remove('hidden');
+            
+            document.getElementById('activityNotes').value = '';
+            document.getElementById('activityOutcome').value = '';
+            document.getElementById('activityNotes').focus();
+        }
+
+        function activityBackToStep1() {
+            AppState.activityStep = 1;
+            document.getElementById('activityStep2').classList.add('hidden');
+            document.getElementById('activityStep1').classList.remove('hidden');
+        }
+
+        function activityBackToStep2() {
+            AppState.activityStep = 2;
+            document.getElementById('activityStep3').classList.add('hidden');
+            document.getElementById('activityStep2').classList.remove('hidden');
+        }
+
+        function saveActivity() {
+            const notes = document.getElementById('activityNotes').value.trim();
+            
+            if (!notes) {
+                alert('Please enter notes for this activity');
+                return;
+            }
+            
+            const activityType = AppState.getActivityType(AppState.selectedActivityType);
+            const now = new Date().toISOString();
+            
+            const activity = {
+                id: 'act_' + Date.now(),
+                accountId: AppState.selectedAccount,
+                userId: AppState.currentUser.id,
+                type: AppState.selectedActivityType,
+                points: activityType.points,
+                notes: notes,
+                outcome: document.getElementById('activityOutcome').value.trim(),
+                createdAt: now
+            };
+            
+            AppState.workspace.activities.push(activity);
+            
+            // Update account
+            const account = AppState.getAccount(AppState.selectedAccount);
+            account.lastActivityAt = now;
+            account.lastPointsAt = now;
+            
+            AppState.saveWorkspace();
+            
+            closeModal('logActivityModal');
+            renderHome();
+            
+            // Show success feedback
+            alert(`Activity logged! +${activityType.points} points`);
+        }
+
+        // ============================================================================
+        // PURCHASE ORDERS
+        // ============================================================================
+
+        function renderPOs() {
+            const filter = AppState.currentPOFilter;
+            let pos = AppState.workspace.purchaseOrders;
+            
+            // Filter by user (reps only see their own)
+            if (AppState.currentUser.role === 'rep') {
+                const userAccountIds = AppState.getUserAccounts(AppState.currentUser.id).map(a => a.id);
+                pos = pos.filter(p => userAccountIds.includes(p.accountId));
+            }
+            
+            // Filter by status
+            if (filter !== 'all') {
+                pos = pos.filter(p => p.status === filter);
+            }
+            
+            pos = pos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            const listDiv = document.getElementById('posList');
+            listDiv.innerHTML = '';
+            
+            if (pos.length === 0) {
+                listDiv.innerHTML = '<div class="empty-state">No purchase orders</div>';
+                return;
+            }
+            
+            pos.forEach(po => {
+                const account = AppState.getAccount(po.accountId);
+                const user = AppState.getUser(po.userId);
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.cursor = 'pointer';
+                card.onclick = () => editPO(po.id);
+                
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                        <div style="font-weight: 600; font-size: 16px;">${account.name}</div>
+                        <span class="account-status ${po.status.toLowerCase()}">${po.status}</span>
+                    </div>
+                    <div style="font-size: 14px; margin-bottom: 4px;">${po.lineSummary}</div>
+                    ${po.totalAmount ? `<div style="font-weight: 600; color: #667eea; margin-bottom: 4px;">$${po.totalAmount.toFixed(2)}</div>` : ''}
+                    <div style="font-size: 12px; color: #666;">
+                        Requested: ${po.requestedDate}<br>
+                        Created by ${user.name} on ${formatDate(po.createdAt)}
+                    </div>
+                `;
+                
+                listDiv.appendChild(card);
+            });
+        }
+
+        function filterPOs(status) {
+            AppState.currentPOFilter = status;
+            renderPOs();
+        }
+
+        function showCreatePO() {
+            AppState.editingPOId = null;
+            const modal = document.getElementById('poFormModal');
+            
+            document.getElementById('poFormTitle').textContent = 'Create Purchase Order';
+            
+            // Populate accounts
+            const accountSelect = document.getElementById('poFormAccount');
+            accountSelect.innerHTML = '';
+            const accounts = AppState.getUserAccounts(AppState.currentUser.id);
+            accounts.forEach(account => {
+                const option = document.createElement('option');
+                option.value = account.id;
+                option.textContent = account.name;
+                accountSelect.appendChild(option);
+            });
+            
+            // Reset form
+            document.getElementById('poFormDate').value = '';
+            document.getElementById('poFormLines').value = '';
+            document.getElementById('poFormAmount').value = '';
+            document.getElementById('poFormNotes').value = '';
+            document.getElementById('poFormStatusGroup').style.display = 'none';
+            
+            modal.classList.add('active');
+        }
+
+        function showCreatePOForAccount(accountId) {
+            closeModal('accountDetailModal');
+            showCreatePO();
+            document.getElementById('poFormAccount').value = accountId;
+        }
+
+        function editPO(poId) {
+            AppState.editingPOId = poId;
+            const po = AppState.workspace.purchaseOrders.find(p => p.id === poId);
+            const modal = document.getElementById('poFormModal');
+            
+            document.getElementById('poFormTitle').textContent = 'Edit Purchase Order';
+            
+            // Populate accounts
+            const accountSelect = document.getElementById('poFormAccount');
+            accountSelect.innerHTML = '';
+            
+            if (AppState.currentUser.role === 'admin') {
+                // Admin can see all accounts
+                AppState.workspace.accounts.forEach(account => {
+                    const option = document.createElement('option');
+                    option.value = account.id;
+                    option.textContent = account.name;
+                    accountSelect.appendChild(option);
+                });
+            } else {
+                const accounts = AppState.getUserAccounts(AppState.currentUser.id);
+                accounts.forEach(account => {
+                    const option = document.createElement('option');
+                    option.value = account.id;
+                    option.textContent = account.name;
+                    accountSelect.appendChild(option);
+                });
+            }
+            
+            // Populate form
+            document.getElementById('poFormAccount').value = po.accountId;
+            document.getElementById('poFormDate').value = po.requestedDate;
+            document.getElementById('poFormLines').value = po.lineSummary;
+            document.getElementById('poFormAmount').value = po.totalAmount || '';
+            document.getElementById('poFormNotes').value = po.notes;
+            
+            // Show status for editing
+            if (AppState.currentUser.role === 'admin') {
+                document.getElementById('poFormStatusGroup').style.display = 'block';
+                document.getElementById('poFormStatus').value = po.status;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function savePO(action) {
+            const accountId = document.getElementById('poFormAccount').value;
+            const requestedDate = document.getElementById('poFormDate').value;
+            const lineSummary = document.getElementById('poFormLines').value.trim();
+            const totalAmount = parseFloat(document.getElementById('poFormAmount').value) || null;
+            const notes = document.getElementById('poFormNotes').value.trim();
+            
+            if (!lineSummary) {
+                alert('Please enter line summary');
+                return;
+            }
+            
+            const now = new Date().toISOString();
+            
+            if (AppState.editingPOId) {
+                // Edit existing
+                const po = AppState.workspace.purchaseOrders.find(p => p.id === AppState.editingPOId);
+                po.accountId = accountId;
+                po.requestedDate = requestedDate;
+                po.lineSummary = lineSummary;
+                po.totalAmount = totalAmount;
+                po.notes = notes;
+                po.updatedAt = now;
+                
+                // Admin can change status directly
+                if (AppState.currentUser.role === 'admin') {
+                    po.status = document.getElementById('poFormStatus').value;
+                } else if (action === 'Submitted' && po.status === 'Draft') {
+                    po.status = 'Submitted';
+                }
+            } else {
+                // Create new
+                const po = {
+                    id: 'po_' + Date.now(),
+                    accountId: accountId,
+                    userId: AppState.currentUser.id,
+                    status: action,
+                    requestedDate: requestedDate,
+                    totalAmount: totalAmount,
+                    lineSummary: lineSummary,
+                    notes: notes,
+                    createdAt: now,
+                    updatedAt: now
+                };
+                
+                AppState.workspace.purchaseOrders.push(po);
+            }
+            
+            AppState.saveWorkspace();
+            closeModal('poFormModal');
+            renderPOs();
+        }
+
+        // ============================================================================
+        // ADMIN SCREEN
+        // ============================================================================
+
+        function renderAdmin() {
+            if (AppState.currentUser.role !== 'admin') return;
+            
+            // Team Summary
+            const reps = AppState.workspace.users.filter(u => u.role === 'rep');
+            const summaryDiv = document.getElementById('teamSummary');
+            summaryDiv.innerHTML = '';
+            
+            reps.forEach(rep => {
+                const today = AppState.pointsToday(rep.id);
+                const week = AppState.pointsThisWeek(rep.id);
+                const streak = AppState.streakDays(rep.id);
+                const target = rep.target || AppState.workspace.defaultTarget;
+                
+                const card = document.createElement('div');
+                card.className = 'team-member-card';
+                card.onclick = () => showRepHistory(rep.id);
+                card.style.cursor = 'pointer';
+                
+                card.innerHTML = `
+                    <div class="team-member-header">
+                        <div class="team-member-name">${rep.name}</div>
+                        ${streak >= 3 ? `<div class="streak-badge" style="font-size: 12px;">🔥 ${streak}</div>` : ''}
+                    </div>
+                    <div class="team-member-stats">
+                        <div class="team-stat-item">
+                            <div class="team-stat-label">Today</div>
+                            <div class="team-stat-value">${today} / ${target}</div>
+                        </div>
+                        <div class="team-stat-item">
+                            <div class="team-stat-label">This Week</div>
+                            <div class="team-stat-value">${week}</div>
+                        </div>
+                        <div class="team-stat-item">
+                            <div class="team-stat-label">Target</div>
+                            <div class="team-stat-value">${target}</div>
+                        </div>
+                    </div>
+                `;
+                
+                summaryDiv.appendChild(card);
+            });
+            
+            // Account Health
+            const health = AppState.accountHealthMetrics();
+            document.getElementById('activeAccountsCount').textContent = health.active;
+            document.getElementById('atRiskCount').textContent = health.atRisk;
+            document.getElementById('criticalCount').textContent = health.critical;
+            document.getElementById('teamVelocity').textContent = AppState.teamVelocity() + '%';
+            
+            // All Accounts
+            renderAdminAccounts();
+        }
+
+        function renderAdminAccounts() {
+            const listDiv = document.getElementById('adminAccountsList');
+            listDiv.innerHTML = '';
+            
+            const accounts = AppState.workspace.accounts.sort((a, b) => 
+                new Date(b.lastActivityAt) - new Date(a.lastActivityAt)
+            );
+            
+            accounts.slice(0, 10).forEach(account => {
+                const owner = AppState.getUser(account.ownerUserId);
+                const state = AppState.accountHaloState(account.id);
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.cursor = 'pointer';
+                card.style.padding = '12px';
+                card.style.marginBottom = '8px';
+                card.onclick = () => showAccountDetail(account.id);
+                
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <div style="font-weight: 600;">${account.name}</div>
+                            <div style="font-size: 12px; color: #666;">Owner: ${owner.name}</div>
+                            <div style="font-size: 12px; color: #666;">Last activity: ${formatTimeAgo(account.lastActivityAt)}</div>
+                        </div>
+                        <div>
+                            <span class="account-status ${account.status.toLowerCase()}">${account.status}</span>
+                            ${state !== 'OK' ? `<div style="font-size: 12px; color: #EF5350; margin-top: 4px;">${state}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                listDiv.appendChild(card);
+            });
+        }
+
+        // ============================================================================
+        // ACCOUNT MANAGEMENT
+        // ============================================================================
+
+        function showCreateAccount() {
+            AppState.editingAccountId = null;
+            const modal = document.getElementById('accountFormModal');
+            
+            document.getElementById('accountFormTitle').textContent = 'Create Account';
+            document.getElementById('accountFormName').value = '';
+            document.getElementById('accountFormStatus').value = 'Prospect';
+            
+            // Owner select
+            const ownerSelect = document.getElementById('accountFormOwner');
+            ownerSelect.innerHTML = '';
+            
+            if (AppState.currentUser.role === 'admin') {
+                document.getElementById('accountFormOwnerGroup').style.display = 'block';
+                const reps = AppState.workspace.users.filter(u => u.role === 'rep');
+                reps.forEach(rep => {
+                    const option = document.createElement('option');
+                    option.value = rep.id;
+                    option.textContent = rep.name;
+                    ownerSelect.appendChild(option);
+                });
+            } else {
+                document.getElementById('accountFormOwnerGroup').style.display = 'none';
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function editAccount(accountId) {
+            AppState.editingAccountId = accountId;
+            const account = AppState.getAccount(accountId);
+            const modal = document.getElementById('accountFormModal');
+            
+            document.getElementById('accountFormTitle').textContent = 'Edit Account';
+            document.getElementById('accountFormName').value = account.name;
+            document.getElementById('accountFormStatus').value = account.status;
+            
+            // Owner select
+            const ownerSelect = document.getElementById('accountFormOwner');
+            ownerSelect.innerHTML = '';
+            
+            if (AppState.currentUser.role === 'admin') {
+                document.getElementById('accountFormOwnerGroup').style.display = 'block';
+                const reps = AppState.workspace.users.filter(u => u.role === 'rep');
+                reps.forEach(rep => {
+                    const option = document.createElement('option');
+                    option.value = rep.id;
+                    option.textContent = rep.name;
+                    ownerSelect.appendChild(option);
+                });
+                ownerSelect.value = account.ownerUserId;
+            } else {
+                document.getElementById('accountFormOwnerGroup').style.display = 'none';
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function saveAccount() {
+            const name = document.getElementById('accountFormName').value.trim();
+            const status = document.getElementById('accountFormStatus').value;
+            
+            if (!name) {
+                alert('Please enter account name');
+                return;
+            }
+            
+            const now = new Date().toISOString();
+            
+            if (AppState.editingAccountId) {
+                // Edit
+                const account = AppState.getAccount(AppState.editingAccountId);
+                account.name = name;
+                account.status = status;
+                
+                if (AppState.currentUser.role === 'admin') {
+                    account.ownerUserId = document.getElementById('accountFormOwner').value;
+                }
+            } else {
+                // Create
+                const ownerId = AppState.currentUser.role === 'admin' 
+                    ? document.getElementById('accountFormOwner').value 
+                    : AppState.currentUser.id;
+                
+                const account = {
+                    id: 'acc_' + Date.now(),
+                    name: name,
+                    status: status,
+                    ownerUserId: ownerId,
+                    createdAt: now,
+                    lastActivityAt: now,
+                    lastPointsAt: now
+                };
+                
+                AppState.workspace.accounts.push(account);
+            }
+            
+            AppState.saveWorkspace();
+            closeModal('accountFormModal');
+            
+            if (AppState.currentScreen === 'accounts') {
+                renderAccounts();
+            } else if (AppState.currentScreen === 'admin') {
+                renderAdmin();
+            }
+        }
+
+        // ============================================================================
+        // SETTINGS
+        // ============================================================================
+
+        function showActivitySettings() {
+            const modal = document.getElementById('activitySettingsModal');
+            const listDiv = document.getElementById('activitySettingsList');
+            listDiv.innerHTML = '';
+            
+            AppState.workspace.activityTypes.forEach(type => {
+                const group = document.createElement('div');
+                group.className = 'form-group';
+                group.innerHTML = `
+                    <label class="form-label">${type.name}</label>
+                    <input type="number" class="form-input" value="${type.points}" min="0" data-type-id="${type.id}">
+                `;
+                listDiv.appendChild(group);
+            });
+            
+            modal.classList.add('active');
+        }
+
+        function saveActivitySettings() {
+            const inputs = document.querySelectorAll('#activitySettingsList input');
+            inputs.forEach(input => {
+                const typeId = input.dataset.typeId;
+                const points = parseInt(input.value) || 0;
+                const type = AppState.workspace.activityTypes.find(t => t.id === typeId);
+                if (type) {
+                    type.points = points;
+                }
+            });
+            
+            AppState.saveWorkspace();
+            closeModal('activitySettingsModal');
+            alert('Activity settings saved!');
+        }
+
+        function showUserManagement() {
+            const modal = document.getElementById('userManagementModal');
+            const listDiv = document.getElementById('userManagementList');
+            listDiv.innerHTML = '';
+            
+            AppState.workspace.users.forEach(user => {
+                const card = document.createElement('div');
+                card.className = 'team-member-card';
+                
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div class="team-member-name">${user.name}</div>
+                            <div style="font-size: 12px; color: #666;">${user.role === 'admin' ? 'Administrator' : 'Sales Rep'}</div>
+                            <div style="font-size: 12px; color: #666;">Target: ${user.target || AppState.workspace.defaultTarget} pts/day</div>
+                        </div>
+                        <div>
+                            ${user.role === 'rep' ? `<button class="btn-small btn-secondary" onclick="editUserTarget('${user.id}')">Edit Target</button>` : ''}
+                            ${user.id !== AppState.currentUser.id ? `<button class="btn-small btn-danger" onclick="removeUser('${user.id}')">Remove</button>` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                listDiv.appendChild(card);
+            });
+            
+            modal.classList.add('active');
+        }
+
+        function editUserTarget(userId) {
+            const user = AppState.getUser(userId);
+            const newTarget = prompt(`Enter new daily target for ${user.name}:`, user.target || AppState.workspace.defaultTarget);
+            
+            if (newTarget !== null) {
+                const target = parseInt(newTarget);
+                if (target > 0) {
+                    user.target = target;
+                    AppState.saveWorkspace();
+                    showUserManagement();
+                }
+            }
+        }
+
+        function removeUser(userId) {
+            if (!confirm("Are you sure you want to remove this user? Their data will remain but they won't be able to sign in.")) {
+                return;
+            }
+            
+            const index = AppState.workspace.users.findIndex(u => u.id === userId);
+            if (index !== -1) {
+                AppState.workspace.users.splice(index, 1);
+                AppState.saveWorkspace();
+                showUserManagement();
+            }
+        }
+
+        function showPackSettings() {
+            const modal = document.getElementById('packSettingsModal');
+            document.getElementById('purchasedPacks').value = AppState.workspace.purchasedPacks;
+            document.getElementById('defaultTarget').value = AppState.workspace.defaultTarget;
+            modal.classList.add('active');
+        }
+
+        function savePackSettings() {
+            AppState.workspace.purchasedPacks = parseInt(document.getElementById('purchasedPacks').value) || 1;
+            AppState.workspace.defaultTarget = parseInt(document.getElementById('defaultTarget').value) || 50;
+            AppState.saveWorkspace();
+            closeModal('packSettingsModal');
+            alert('Settings saved!');
+        }
+
+        function showCreateUser() {
+            closeModal('userManagementModal');
+            const modal = document.getElementById('createUserModal');
+            document.getElementById('newUserName').value = '';
+            document.getElementById('newUserRole').value = 'rep';
+            modal.classList.add('active');
+        }
+
+        function createUser() {
+            const name = document.getElementById('newUserName').value.trim();
+            const role = document.getElementById('newUserRole').value;
+            
+            if (!name) {
+                alert('Please enter a name');
+                return;
+            }
+            
+            // Check capacity
+            const maxUsers = 1 + (10 * AppState.workspace.purchasedPacks); // 1 admin + 10 reps per pack
+            const currentUsers = AppState.workspace.users.length;
+            
+            if (currentUsers >= maxUsers) {
+                alert(`Maximum users reached (${maxUsers}). Increase purchased packs to add more users.`);
+                return;
+            }
+            
+            // Check admin limit
+            if (role === 'admin') {
+                const adminCount = AppState.workspace.users.filter(u => u.role === 'admin').length;
+                if (adminCount >= 1) {
+                    alert('Only one admin allowed per workspace');
+                    return;
+                }
+            }
+            
+            const user = {
+                id: role + '_' + Date.now(),
+                name: name,
+                role: role,
+                target: AppState.workspace.defaultTarget,
+                createdAt: new Date().toISOString()
+            };
+            
+            AppState.workspace.users.push(user);
+            AppState.saveWorkspace();
+            
+            closeModal('createUserModal');
+            
+            if (document.getElementById('signInScreen').classList.contains('active')) {
+                renderSignIn();
+            } else {
+                showUserManagement();
+            }
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(AppState.workspace, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `halo_export_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // ============================================================================
+        // HISTORY VIEW
+        // ============================================================================
+
+        function showHistory() {
+            const modal = document.getElementById('historyModal');
+            const contentDiv = document.getElementById('historyContent');
+            
+            renderHistoryContent(AppState.currentUser.id, contentDiv);
+            
+            modal.classList.add('active');
+        }
+
+        function showRepHistory(userId) {
+            const modal = document.getElementById('historyModal');
+            const contentDiv = document.getElementById('historyContent');
+            
+            renderHistoryContent(userId, contentDiv);
+            
+            modal.classList.add('active');
+        }
+
+        function renderHistoryContent(userId, contentDiv) {
+            const user = AppState.getUser(userId);
+            const weeks = AppState.getUserWeekHistory(userId, 12);
+            
+            let html = `<div class="card"><div class="card-title">${user.name} - Performance History</div>`;
+            
+            // Current week (not archived yet)
+            const { start: weekStart } = AppState.getCurrentWeek();
+            const weekStartStr = weekStart.toISOString().split('T')[0];
+            const thisWeekArchived = weeks.find(w => w.weekStart === weekStartStr);
+            
+            if (!thisWeekArchived) {
+                const pointsWeek = AppState.pointsThisWeek(userId);
+                const streak = AppState.streakDays(userId);
+                const target = user.target || AppState.workspace.defaultTarget;
+                
+                html += `
+                    <div class="week-card">
+                        <div class="week-header">
+                            <div class="week-range">This Week (In Progress)</div>
+                            <div class="week-total">${pointsWeek} pts</div>
+                        </div>
+                        <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                            Daily Target: ${target} | Streak: ${streak} days
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Historical weeks
+            if (weeks.length === 0) {
+                html += '<div class="empty-state">No historical data yet</div>';
+            } else {
+                weeks.forEach(week => {
+                    const weekDate = new Date(week.weekStart);
+                    const weekEnd = new Date(weekDate);
+                    weekEnd.setDate(weekEnd.getDate() + 6);
+                    
+                    html += `
+                        <div class="week-card">
+                            <div class="week-header">
+                                <div class="week-range">${formatDate(weekDate)} - ${formatDate(weekEnd)}</div>
+                                <div class="week-total">${week.totalPoints} pts</div>
+                            </div>
+                            <div style="font-size: 12px; color: #666; margin-top: 4px; margin-bottom: 8px;">
+                                Hit target: ${week.daysHitTarget} days | Best streak: ${week.streakAchieved} days
+                            </div>
+                            <div class="daily-grid">
+                    `;
+                    
+                    week.dailyBreakdown.forEach(day => {
+                        const dayDate = new Date(day.date);
+                        const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dayDate.getDay()];
+                        const className = day.hitTarget ? 'hit' : (day.points > 0 ? 'miss' : '');
+                        
+                        html += `
+                            <div class="day-box ${className}">
+                                <div class="day-label">${dayName}</div>
+                                <div class="day-points">${day.points}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            html += '</div>';
+            
+            // Monthly summary (last 3 months)
+            html += '<div class="card"><div class="card-title">Monthly Summary</div>';
+            
+            const now = new Date();
+            for (let i = 0; i < 3; i++) {
+                const checkDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const monthStats = AppState.getMonthlyStats(userId, checkDate.getFullYear(), checkDate.getMonth());
+                
+                if (monthStats.weeksCount > 0) {
+                    const monthName = checkDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                    
+                    html += `
+                        <div class="team-member-card">
+                            <div class="team-member-header">
+                                <div class="team-member-name">${monthName}</div>
+                                <div class="team-stat-value">${monthStats.totalPoints} pts</div>
+                            </div>
+                            <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                                ${monthStats.weeksCount} weeks tracked | ${monthStats.totalDaysHitTarget} days hit target | Best streak: ${monthStats.bestStreak}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            html += '</div>';
+            
+            contentDiv.innerHTML = html;
+        }
+
+        // ============================================================================
+        // MODAL HELPERS
+        // ============================================================================
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Close modals on outside click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // ============================================================================
+        // UTILITY FUNCTIONS
+        // ============================================================================
+
+        function formatTimeAgo(isoString) {
+            const date = new Date(isoString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            
+            if (seconds < 60) return 'just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+            if (seconds < 604800) return Math.floor(seconds / 86400) + 'd ago';
+            
+            return formatDate(date);
+        }
+
+        function formatDate(date) {
+            if (typeof date === 'string') date = new Date(date);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function formatDateTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+        }
+
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+
+        // Initialize app on load
+        document.addEventListener('DOMContentLoaded', () => {
+            AppState.init();
+        });
+
+        // Auto-archive weeks (run weekly check)
+        // In production, this would be a backend cron job
+        setInterval(() => {
+            const { start } = AppState.getCurrentWeek();
+            const now = new Date();
+            
+            // If it's a new week (Sunday), archive last week
+            if (now.getDay() === 0 && now.getHours() === 0) {
+                AppState.workspace.users.filter(u => u.role === 'rep').forEach(rep => {
+                    AppState.archiveCurrentWeek(rep.id);
+                });
+            }
+        }, 3600000); // Check every hour
+
+    </script>
+</body>
+</html>
