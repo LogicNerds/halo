@@ -28,8 +28,8 @@
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #f0f0f0;
+            color: #333;
             padding: 20px;
             text-align: center;
             position: sticky;
@@ -47,17 +47,14 @@
             gap: 8px;
         }
 
-        .halo-icon {
-            width: 28px;
-            height: 28px;
-            border: 3px solid white;
-            border-radius: 50%;
-            display: inline-block;
+        .halo-logo {
+            height: 40px;
+            width: auto;
         }
 
         .header-subtitle {
             font-size: 14px;
-            opacity: 0.9;
+            opacity: 0.7;
             margin-top: 4px;
         }
 
@@ -613,13 +610,57 @@
         .hidden {
             display: none;
         }
+
+        /* Splash Screen */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeOut 0.5s ease-in-out 1.5s forwards;
+        }
+
+        .splash-logo {
+            max-width: 300px;
+            width: 80%;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Splash Screen -->
+    <div class="splash-screen" id="splashScreen">
+        <img src="https://raw.githubusercontent.com/LogicNerds/halo/main/assets/halo%20logo.png" alt="Halo" class="splash-logo">
+    </div>
+
     <div class="container">
         <div class="header">
-            <h1><span class="halo-icon"></span> Halo</h1>
-            <div class="header-subtitle" id="headerSubtitle">Micro CRM</div>
+            <img src="https://raw.githubusercontent.com/LogicNerds/halo/main/assets/halo%20logo.png" alt="Halo" class="halo-logo">
+            <div class="header-subtitle" id="headerSubtitle"></div>
         </div>
 
         <!-- Sign In Screen -->
@@ -688,7 +729,10 @@
                         <input type="text" class="form-input mb-8" placeholder="Search accounts..." id="accountSearch" oninput="filterAccounts()">
                         <ul class="account-list" id="allAccountsList"></ul>
                     </div>
-                    <button class="btn btn-secondary" onclick="showCreateAccount()">+ Add Account</button>
+                    <div class="flex">
+                        <button class="btn btn-secondary flex-1" onclick="showCreateAccount()">+ Add Account</button>
+                        <button class="btn btn-secondary flex-1" onclick="showImportCSV()">📥 Import CSV</button>
+                    </div>
                 </div>
             </div>
 
@@ -996,6 +1040,46 @@
             </div>
             
             <div id="historyContent"></div>
+        </div>
+    </div>
+
+    <!-- Import CSV Modal -->
+    <div id="importCSVModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('importCSVModal')">&times;</span>
+                Import Accounts from CSV
+            </div>
+            
+            <div class="card" style="background: #f0f4ff; margin-bottom: 16px;">
+                <div style="font-size: 14px; margin-bottom: 8px;"><strong>Expected CSV Format:</strong></div>
+                <div style="font-size: 12px; font-family: monospace; background: white; padding: 8px; border-radius: 4px;">
+                    name,status,owner<br>
+                    Green Valley Dispensary,Active,Sarah Johnson<br>
+                    Mountain High Cannabis,Prospect,Mike Chen
+                </div>
+                <div style="font-size: 12px; color: #666; margin-top: 8px;">
+                    • Header row required<br>
+                    • Status: Prospect, Active, or Dormant<br>
+                    • Owner: Must match existing user name
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Select CSV File</label>
+                <input type="file" class="form-input" id="csvFileInput" accept=".csv" onchange="handleCSVFile(event)">
+            </div>
+            
+            <div id="importPreview" style="display: none; margin-top: 16px;">
+                <div class="card" style="background: #f8f9fa;">
+                    <div class="card-title">Preview</div>
+                    <div id="importPreviewContent" style="font-size: 14px;"></div>
+                </div>
+            </div>
+            
+            <div id="importResults" style="display: none; margin-top: 16px;"></div>
+            
+            <button class="btn btn-primary" id="importButton" onclick="executeImport()" style="display: none;">Import Accounts</button>
         </div>
     </div>
 
@@ -1569,7 +1653,18 @@
             }
             
             updateHeader();
-            navigate('home');
+            
+            // Explicitly set home screen as active and render it
+            AppState.currentScreen = 'home';
+            document.getElementById('homeScreen').classList.add('active');
+            
+            // Set home nav button as active
+            const navItems = document.querySelectorAll('.nav-item');
+            if (navItems[0]) {
+                navItems[0].classList.add('active');
+            }
+            
+            renderHome();
         }
 
         function signOut() {
@@ -1588,7 +1683,19 @@
         function navigate(screen) {
             // Update nav buttons
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            event.target.closest('.nav-item').classList.add('active');
+            
+            // Find and activate the correct nav button
+            const navButtons = {
+                'home': 0,
+                'accounts': 1,
+                'pos': 2,
+                'admin': 3
+            };
+            const navItems = document.querySelectorAll('.nav-item');
+            const buttonIndex = navButtons[screen];
+            if (buttonIndex !== undefined && navItems[buttonIndex]) {
+                navItems[buttonIndex].classList.add('active');
+            }
             
             // Update screens
             document.querySelectorAll('#mainApp > .screen').forEach(s => s.classList.remove('active'));
@@ -2524,6 +2631,240 @@
         }
 
         // ============================================================================
+        // CSV IMPORT
+        // ============================================================================
+
+        let parsedCSVData = null;
+
+        function showImportCSV() {
+            const modal = document.getElementById('importCSVModal');
+            
+            // Reset modal state
+            document.getElementById('csvFileInput').value = '';
+            document.getElementById('importPreview').style.display = 'none';
+            document.getElementById('importResults').style.display = 'none';
+            document.getElementById('importButton').style.display = 'none';
+            parsedCSVData = null;
+            
+            modal.classList.add('active');
+        }
+
+        function handleCSVFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                parseCSV(text);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCSV(text) {
+            // Simple CSV parser (handles basic cases)
+            const lines = text.trim().split('\n');
+            if (lines.length < 2) {
+                alert('CSV file must have at least a header row and one data row');
+                return;
+            }
+            
+            // Parse header
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+            
+            // Validate headers
+            const requiredHeaders = ['name', 'status', 'owner'];
+            const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+            if (missingHeaders.length > 0) {
+                alert('Missing required columns: ' + missingHeaders.join(', '));
+                return;
+            }
+            
+            // Parse rows
+            const rows = [];
+            const errors = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue; // Skip empty lines
+                
+                const values = line.split(',').map(v => v.trim());
+                const row = {};
+                
+                headers.forEach((header, index) => {
+                    row[header] = values[index] || '';
+                });
+                
+                // Validate row
+                const validation = validateCSVRow(row, i + 1);
+                if (validation.valid) {
+                    rows.push(row);
+                } else {
+                    errors.push(validation.error);
+                }
+            }
+            
+            if (rows.length === 0) {
+                alert('No valid rows found in CSV');
+                return;
+            }
+            
+            parsedCSVData = { rows, errors };
+            showImportPreview();
+        }
+
+        function validateCSVRow(row, lineNumber) {
+            // Check name
+            if (!row.name) {
+                return { valid: false, error: `Line ${lineNumber}: Missing account name` };
+            }
+            
+            // Check status
+            const validStatuses = ['prospect', 'active', 'dormant'];
+            if (!row.status || !validStatuses.includes(row.status.toLowerCase())) {
+                return { valid: false, error: `Line ${lineNumber}: Invalid status "${row.status}" (must be Prospect, Active, or Dormant)` };
+            }
+            
+            // Check owner exists
+            if (!row.owner) {
+                return { valid: false, error: `Line ${lineNumber}: Missing owner` };
+            }
+            
+            const ownerUser = AppState.workspace.users.find(u => 
+                u.name.toLowerCase() === row.owner.toLowerCase()
+            );
+            
+            if (!ownerUser) {
+                return { valid: false, error: `Line ${lineNumber}: Owner "${row.owner}" not found (must match existing user name)` };
+            }
+            
+            // Check if rep owns the import (unless admin)
+            if (AppState.currentUser.role === 'rep' && ownerUser.id !== AppState.currentUser.id) {
+                return { valid: false, error: `Line ${lineNumber}: Cannot assign accounts to other users (you can only import your own accounts)` };
+            }
+            
+            return { valid: true };
+        }
+
+        function showImportPreview() {
+            const previewDiv = document.getElementById('importPreview');
+            const contentDiv = document.getElementById('importPreviewContent');
+            
+            let html = `<strong>${parsedCSVData.rows.length} accounts ready to import</strong><br><br>`;
+            
+            // Show first 5 rows
+            const preview = parsedCSVData.rows.slice(0, 5);
+            preview.forEach(row => {
+                html += `• ${row.name} (${row.status}, owner: ${row.owner})<br>`;
+            });
+            
+            if (parsedCSVData.rows.length > 5) {
+                html += `<br>... and ${parsedCSVData.rows.length - 5} more`;
+            }
+            
+            // Show errors if any
+            if (parsedCSVData.errors.length > 0) {
+                html += `<br><br><strong style="color: #EF5350;">Errors (${parsedCSVData.errors.length} rows will be skipped):</strong><br>`;
+                parsedCSVData.errors.slice(0, 5).forEach(err => {
+                    html += `<span style="font-size: 12px;">• ${err}</span><br>`;
+                });
+                if (parsedCSVData.errors.length > 5) {
+                    html += `<span style="font-size: 12px;">... and ${parsedCSVData.errors.length - 5} more errors</span>`;
+                }
+            }
+            
+            contentDiv.innerHTML = html;
+            previewDiv.style.display = 'block';
+            document.getElementById('importButton').style.display = 'block';
+        }
+
+        function executeImport() {
+            if (!parsedCSVData || parsedCSVData.rows.length === 0) {
+                alert('No data to import');
+                return;
+            }
+            
+            const now = new Date().toISOString();
+            let successCount = 0;
+            const duplicates = [];
+            
+            parsedCSVData.rows.forEach(row => {
+                // Check for duplicate names
+                const existing = AppState.workspace.accounts.find(a => 
+                    a.name.toLowerCase() === row.name.toLowerCase()
+                );
+                
+                if (existing) {
+                    duplicates.push(row.name);
+                    return;
+                }
+                
+                // Find owner user
+                const ownerUser = AppState.workspace.users.find(u => 
+                    u.name.toLowerCase() === row.owner.toLowerCase()
+                );
+                
+                // Normalize status
+                const status = row.status.charAt(0).toUpperCase() + row.status.slice(1).toLowerCase();
+                
+                // Create account
+                const account = {
+                    id: 'acc_' + Date.now() + '_' + successCount,
+                    name: row.name,
+                    status: status,
+                    ownerUserId: ownerUser.id,
+                    createdAt: now,
+                    lastActivityAt: now,
+                    lastPointsAt: now
+                };
+                
+                AppState.workspace.accounts.push(account);
+                successCount++;
+            });
+            
+            AppState.saveWorkspace();
+            
+            // Show results
+            const resultsDiv = document.getElementById('importResults');
+            let resultsHTML = `
+                <div class="card" style="background: #E8F5E9;">
+                    <div style="font-size: 16px; font-weight: 600; color: #388E3C; margin-bottom: 8px;">
+                        ✅ Import Complete!
+                    </div>
+                    <div style="font-size: 14px;">
+                        Successfully imported ${successCount} accounts
+                    </div>
+                </div>
+            `;
+            
+            if (duplicates.length > 0) {
+                resultsHTML += `
+                    <div class="card" style="background: #FFF3E0; margin-top: 12px;">
+                        <div style="font-size: 14px; font-weight: 600; color: #F57C00; margin-bottom: 8px;">
+                            ⚠️ ${duplicates.length} Duplicates Skipped
+                        </div>
+                        <div style="font-size: 12px;">
+                            ${duplicates.slice(0, 5).join(', ')}
+                            ${duplicates.length > 5 ? ` and ${duplicates.length - 5} more` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            resultsDiv.innerHTML = resultsHTML;
+            resultsDiv.style.display = 'block';
+            
+            // Hide preview and import button
+            document.getElementById('importPreview').style.display = 'none';
+            document.getElementById('importButton').style.display = 'none';
+            
+            // Refresh accounts list if on accounts screen
+            if (AppState.currentScreen === 'accounts') {
+                renderAccounts();
+            }
+        }
+
+        // ============================================================================
         // HISTORY VIEW
         // ============================================================================
 
@@ -2704,6 +3045,14 @@
         // Initialize app on load
         document.addEventListener('DOMContentLoaded', () => {
             AppState.init();
+            
+            // Remove splash screen after animation
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                if (splash) {
+                    splash.remove();
+                }
+            }, 2000); // 2 seconds total (matches animation timing)
         });
 
         // Auto-archive weeks (run weekly check)
